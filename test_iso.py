@@ -47,9 +47,9 @@ class TestIsomorphism(unittest.TestCase):
 
         self.assertTrue(optimized.is_isomorphic(graph_6, graph_7)) # random test
         
-        self.assertFalse(simple.is_isomorphic(graph_1, graph_10)) # Degree distribution does not match
+        self.assertFalse(optimized.is_isomorphic(graph_1, graph_10)) # Degree distribution does not match
 
-        self.assertFalse(simple.is_isomorphic(graph_1, graph_11)) # Handle empty graphs
+        self.assertFalse(optimized.is_isomorphic(graph_1, graph_11)) # Handle empty graphs
 
 if __name__ == '__main__':
     unittest.main()

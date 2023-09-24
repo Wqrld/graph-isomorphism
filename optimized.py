@@ -11,6 +11,27 @@ graph_6 = {'J': ['J', 'U'], 'C': ['J', 'C'], 'U': ['J']}  # iso to 7
 graph_7 = {'A': ['A', 'U'], 'U': ['A'], 'C': ['C', 'A']}  # iso to 6
 
 
+# Get sum of degrees of all neighbours of a vertex
+# TODO memoize return value.
+def neighbour_degree_sum(graph: 'dict[str,list[str]]', vertex: str) -> int:
+    return sum(map(len, map(lambda neighbour: graph[neighbour], graph[vertex])))
+
+
+"""
+ Basic graph isomorphism algorithm with a few shortcuts for speedup.
+
+ First, we check if the amount of vertices in both graphs are equal. If they are not then the graphs can never be isomorphic
+
+ Then, we check if the total amount of edges in the graph are equal, again if they are not then the graphs are not isomorphic.
+
+ And the last shortcut: Check if both graphs have the same properties in terms of the vertex degree distribution and
+    the sum of degrees of neighbours.
+
+ These checks will already rule out almost all graphs, for those that are similar enough, 
+    we try all possible permutations of same-degree (and neighbour degree sum distribution) vertices.
+"""
+
+
 # Check for graph isomorphism
 def is_isomorphic(g1: 'dict[str,list[str]]', g2: 'dict[str,list[str]]') -> bool:
 
@@ -29,23 +50,18 @@ def is_isomorphic(g1: 'dict[str,list[str]]', g2: 'dict[str,list[str]]') -> bool:
         print("Edge count is not equal")
         return False
 
-    # Simple case: degree distributions
-    if sorted(map(len, g1.values())) != sorted(map(len, g2.values())):
-        print("Degree distribution is not equal")
+    # Simple case: Sorted array of (degree of vertex, sum of degrees of neighbouring vertices) for all vertices in the graph should be equal.
+    if sorted(map(lambda v: (len(g1[v]), neighbour_degree_sum(g1, v)), g1.keys())) != sorted(map(lambda v: (len(g2[v]), neighbour_degree_sum(g2, v)), g2.keys())):
+        print("Vertex neighbour degree does not match")
         return False
 
-    """
-    TODO:
-     Try *all permutations of all groups of same-degree vertices* and check if this results in a graph isomorphism.
-     - If applicable you may try to make the groups of similar vertices smaller before trying all permutations (which significantly reduces the number of attempts).
-     For example, sort (secondary to the vertex degree) to the sum of neighbour degrees ... 
-    """
     # A(degree 2) can never be B(degree 1) and vice versa
-    mappings = [dict(zip(g1.keys(), g2_keys_permutation))
+    mappings_simple = [dict(zip(g1.keys(), g2_keys_permutation))
                 for g2_keys_permutation in permutations(g2.keys())]  # [{a:x, b:y}, {a:y, b:x}]
     
-    # Optimization: filter out mappings where the vertex degrees do not match.
-    mappings = list(filter(lambda mapping: all(map(lambda key: len(g1[key]) == len(g2[mapping[key]]), g1.keys())), mappings))
+    # Optimization: filter out mappings where the vertex degrees or sum of neighbour degrees do not match.
+    mappings = list(filter(lambda mapping: all(map(lambda key: (len(g1[key]), neighbour_degree_sum(g1, key)) == (len(g2[mapping[key]]), neighbour_degree_sum(g2, mapping[key])), g1.keys())), mappings_simple))
+
     for mapping in mappings:
         for vertex in g1.keys():
             for edge in g1[vertex]:

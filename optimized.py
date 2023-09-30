@@ -1,6 +1,6 @@
 from itertools import permutations
 
-# Five undirected graphs.
+# A few undirected graphs.
 graph_1 = {'A': ['B', 'C'], 'B': ['A'], 'C': ['A']}
 graph_2 = {'X': ['Y', 'Z'], 'Y': ['X'], 'Z': ['X']}  # isomorphic to graph_1
 graph_3 = {'A': ['B', 'C'], 'B': ['A', 'C'],
